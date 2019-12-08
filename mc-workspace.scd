@@ -1,3 +1,6 @@
+// TODO: ~cc that smooth over time
+// TODO: Visualisierung
+
 // Mushroom Clouds
 
 ~runAgents.(100, {|i| i * 0.125})

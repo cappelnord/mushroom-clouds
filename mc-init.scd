@@ -10,5 +10,8 @@
 // "mc-eno.scd".loadRelative;
 // ~eno = ~initEnoOut.();
 
+// ~initMIDICC.((1..8), "LPD8");
+// ~initMIDICC.((11..18), "LPD8");
+
 ~initAgents.(32);
 )

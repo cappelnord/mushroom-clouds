@@ -1,3 +1,5 @@
+var midiInConnections = Dictionary();
+
 var loadImage = {|file|
 	var image = Image.open(file);
 
@@ -53,7 +55,8 @@ var doMonteCarlo;
 	portName = portName ? deviceName;
 	channel = channel ? 0;
 
-	MIDIClient.init;
+
+	MIDIClient.initialized.not.if {MIDIClient.init;};
 	destination = MIDIOut.newByName(deviceName, portName);
 
 	CmdPeriod.add({
@@ -66,6 +69,33 @@ var doMonteCarlo;
 	});
 
 	createMIDIFunction.value(destination, channel, true);
+};
+
+// THIS COULD MAKE ISSUES
+
+~initMIDICC = {|ccs, deviceName, portName, channel|
+	var in;
+	portName = portName ? deviceName;
+
+	midiInConnections[deviceName].isNil.if {
+		MIDIClient.initialized.not.if {MIDIClient.init;};
+
+		in = MIDIIn.findPort(deviceName, portName);
+		MIDIIn.connect(0, in);
+
+		midiInConnections[deviceName] = in;
+	};
+
+	ccs.do {|cc|
+		var key = ("cc" ++ cc).asSymbol;
+		var value = 0.0;
+		MIDIdef.cc(("mccc" ++ cc).asSymbol, {|val|
+			value = val.linlin(0, 127, 0, 1.0);
+			value.postln;
+		}, cc, channel);
+
+		currentEnvironment[key] = {value};
+	};
 };
 
 ~initLoadFungi = {|path|
@@ -83,18 +113,22 @@ var doMonteCarlo;
 	~wAgents = List();
 };
 
+~defaultNoteMap = {|x, y, p, agent|
+	~wNotes[(y * ~wNotes.size).floor]
+};
+
+~defaultVelMap = {|x, y, p, agent|
+	(48 + ((x * (agent[\index] * 0.1)).sin * 6) + 0.gauss(8).abs + (6 * p));
+};
+
+
 ~initAgent = {
 	var agent = ();
 
 	agent[\quant] = nil;
 
-	agent[\noteMap] = {|x, y, p, agent|
-		~wNotes[(y * ~wNotes.size).floor]
-	};
-
-	agent[\velMap] = {|x, y, p, agent|
-		(48 + ((x * (agent[\index] * 0.1)).sin * 6) + 0.gauss(8).abs + (6 * p)).round;
-	};
+	agent[\noteMap] = ~defaultNoteMap;
+	agent[\velMap] = ~defaultVelMap;
 
 	agent[\lenMap] = {|x, y, p, agent|
 		10
@@ -302,3 +336,5 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 		}).play(TempoClock.default);
 	}
 };
+
+MIDIClient.disposeClient;
