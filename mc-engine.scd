@@ -279,7 +279,7 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 ~stopAgents = {
 	"All Agents stopped and cleared!".postln;
 
-	~wAgents.do {|agent| agent[\routine].stop;};
+	~wAgents.do {|agent| agent[\routine].stop; agent[\vizRoutine].stop;};
 	~wAgents = List();
 };
 
@@ -288,7 +288,13 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 
 	var startTime = TempoClock.default.beats;
 
+	var tFunc = {TempoClock.default.beats.linlin(startTime, startTime + length, 0, 1)};
+
 	dispersalFunction = dispersalFunction ? 0.0;
+
+	~wViz.isNil.not.if {
+		~wViz.value(tFunc);
+	};
 
 	~wAgents.do {|agent, i|
 		agent[\routine] = Routine({
@@ -302,7 +308,7 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 				var ret;
 
 				// advance x in time
-				t = TempoClock.default.beats.linlin(startTime, startTime + length, 0, 1);
+				t = tFunc.value;
 
 				ret = doMonteCarlo.value(t, agent, agent[\xFunc], agent[\yFunc], agent[\pPlay], agent[\pRetry], agent[\maxRetries].value);
 

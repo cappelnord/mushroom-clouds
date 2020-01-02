@@ -1,7 +1,7 @@
 import netP5.*;
 import oscP5.*;
 
-static float resampleY = 4.0;
+static float resampleY = 3.0;
 
 volatile ArrayList<DataPoint> incoming;
 
@@ -14,19 +14,18 @@ void setup() {
   incoming = new ArrayList<DataPoint>();
   background(0);
   frameRate(60);
+  noStroke();
 }
 
 void draw() {
   ArrayList<DataPoint> drawing = incoming;
   incoming = new ArrayList<DataPoint>();
-  
-  noStroke();
-  
+    
   for(DataPoint point : drawing) {
     int x = int(point.pos.x * width);
-    int y = int(int(point.pos.y * height * resampleY) / resampleY);
+    int y = int(floor(point.pos.y * height / resampleY) * resampleY);
     fill(point.value * 255);
-    rect(x, y, width-x, resampleY);
+    rect(x, y, 3, resampleY);
   }
 }
 
