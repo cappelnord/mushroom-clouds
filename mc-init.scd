@@ -8,7 +8,7 @@
 // ~piano = ~initMIDI.("Yamaha USB-MIDI-1");
 
 "mc-viz.scd".loadRelative;
-~initViz.value("127.0.0.1", 57140, 6, 0.05);
+~initViz.value("127.0.0.1", 57140, 6, 0.05, ~scanYFunc.value(1080));
 
 // "mc-eno.scd".loadRelative;
 // ~eno = ~initEnoOut.();
