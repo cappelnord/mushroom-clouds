@@ -49,8 +49,10 @@ var createMIDIFunction = {|destination, channel=0, retrigger=true|
 
 var doMonteCarlo;
 
-~initMIDIOut = {|deviceName, portName, channel|
+~initMIDIOut = {|deviceName, portName, channel, buildPedalFunctions=true|
 	var destination;
+
+	var pedals = (\sustain: 0, \unaCorda: 0, \sostenuto: 0);
 
 	portName = portName ? deviceName;
 	channel = channel ? 0;
@@ -59,8 +61,47 @@ var doMonteCarlo;
 	MIDIClient.initialized.not.if {MIDIClient.init;};
 	destination = MIDIOut.newByName(deviceName, portName);
 
+	buildPedalFunctions.if {
+
+		var pedalFunction = {|key, num|
+			{|value, time=0|
+				(time <= 0).if ({
+					pedals[key] = value;
+					destination.control(channel, num, value);
+				},
+				{
+					var currentValue = pedals[key];
+					var delta = (value - currentValue);
+					var steps = delta.abs;
+					var step = delta.sign;
+					var wt = time / steps;
+					fork {
+						steps.do {
+							currentValue = currentValue + step;
+							pedals[key] = currentValue;
+							destination.control(channel, num, currentValue);
+							wt.wait;
+						}
+					};
+				});
+			}
+		};
+
+		~pedSustain = pedalFunction.value(\sustain, 64);
+		~pedCorda = pedalFunction.value(\unaCorda, 67);
+		~pedSostenuto = pedalFunction.value(\sostenuto, 66);
+
+	};
+
+
+
 	CmdPeriod.add({
 		fork {
+
+			~pedSustain.value(0);
+			~pedCorda.value(0);
+			~pedSostenuto.value(0);
+
 			128.do {|n|
 				destination.noteOff(channel, n, 64);
 				0.001.wait;

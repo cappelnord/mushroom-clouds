@@ -1,5 +1,4 @@
 // TODO: ~cc that smooth over time
-// TODO: Visualisierung
 
 // Mushroom Clouds
 
@@ -8,15 +7,19 @@
 // TODO: put closest freq ratio in
 // TODO: Absichern wenn mal Fehler passieren
 
+~pedSustain.(0, 20)
+
 (
 ~wAgents.do {|agent, i|
 	agent[\act] = ~piano;
-	agent[\durMap] = Prand([0.25, 0.5, 1, 2, 4], inf);
-	agent[\quant] = nil;
+	agent[\durMap] = Prand([0.25, 0.25, 16], inf) * 0.25;
+	agent[\velMap] = ~defaultVelMap * 0.3 + 10;
+	agent[\quant] = 2;
 
-	agent[\pPlay] = ~pFungus.("Sparassis crispa") * ~pClosestFreqRatio.() * ~pScale.(Scale.chromatic, 0);
+	agent[\pPlay] = ~pFungus.("Sparassis crispa") * ~pScale.([0, 1, 4, 7], 0);
 
-	agent[\lenMap] = 10 + 10.rand;
+
+	agent[\lenMap] = 3;
 };
 
 )
