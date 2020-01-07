@@ -4,8 +4,8 @@
 ~initWorld.();
 ~initLoadFungi.(Document.current.dir ++ "/fungi");
 
-~piano = ~initMIDIOut.("Microsoft GS Wavetable Synth");
-// ~piano = ~initMIDI.("Yamaha USB-MIDI-1");
+// ~piano = ~initMIDIOut.("Microsoft GS Wavetable Synth");
+~piano = ~initMIDIOut.("Yamaha USB-MIDI-1");
 
 "mc-viz.scd".loadRelative;
 ~initViz.value("127.0.0.1", 57140, 6, 0.05, ~scanYFunc.value(1080));

@@ -11,8 +11,8 @@ PGraphics fbo;
 
 
 void setup() {
-  size(1920, 1080, P3D);
-  fbo = createGraphics(width/2, height/2, P3D);
+  size(1920, 540, P3D);
+  fbo = createGraphics(width, height, P3D);
   
   oscP5 = new OscP5(this, 57140);
   incoming = new ArrayList<DataPoint>();
