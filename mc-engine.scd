@@ -144,6 +144,7 @@ var doMonteCarlo;
 	files.do {|file|
 		var key = file.fileNameWithoutExtension;
 		~wFungi[key] = loadImage.value(file.absolutePath);
+		("\"" ++ key ++ "\"").postln;
 	};
 };
 
