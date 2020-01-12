@@ -1,3 +1,5 @@
+var vizNet;
+
 ~scanYFunc = {|height|
 	var state = 0.0;
 	var delta = 1.0 / height;
@@ -9,7 +11,7 @@
 };
 
 ~initViz = {|host, port, num=2, interval=0.02, yFunc|
-	var net = NetAddr(host, port);
+	vizNet = NetAddr(host, port);
 	yFunc = yFunc ? {1.0.rand};
 
 	~wViz = {|tFunc|
@@ -29,7 +31,7 @@
 						vals.add(value);
 					};
 
-					net.sendMsg("/m", *vals);
+					vizNet.sendMsg("/m", *vals);
 
 					t = tFunc.value;
 					interval.wait;
@@ -37,4 +39,10 @@
 			}).play(TempoClock.default);
 		};
 	};
+};
+
+~clearViz = {
+	vizNet.isNil.not.if {
+		vizNet.sendMsg("/clear");
+	}
 }

@@ -28,6 +28,9 @@ var createMIDIFunction = {|destination, channel=0, retrigger=true|
 	{|num, vel=64, dur=1|
 
 		var routine = table[num];
+
+		[num, vel, dur].postln;
+
 		routine.isNil.if ({
 			destination.noteOn(channel, num, vel);
 		}, {
@@ -202,6 +205,8 @@ var doMonteCarlo;
 		[note, vel, len].postln;
 	};
 
+	agent[\active] = true;
+
 	agent;
 };
 
@@ -261,10 +266,10 @@ var doMonteCarlo;
 		{|x, y, agent|
 			var ret;
 			x = (x * i[\width]).floor;
-			y = (y * i[\height]).floor;
+			y = ((1.0 - y) * i[\height]).floor;
 			ret = i[\array][y * i.width + x];
 			// shaping the final probability with sqrt (according to my likings)
-			(1.0 - ret.sqrt.sqrt.sqrt);
+			ret;
 		};
 	}, {
 		("Could not find fungus: " ++ key).postln;
@@ -274,7 +279,7 @@ var doMonteCarlo;
 
 
 ~initAgents = {|num|
-	~stopAgents.();
+	~clearAgents.();
 
 	num.do {|i|
 		var agent = ~initAgent.();
@@ -318,11 +323,15 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 	ret;
 };
 
-~stopAgents = {
-	"All Agents stopped and cleared!".postln;
-
-	~wAgents.do {|agent| agent[\routine].stop; agent[\vizRoutine].stop;};
+~clearAgents = {
+	~stopAgents.value;
+	"All agents cleared!".postln;
 	~wAgents = List();
+};
+
+~stopAgents = {
+	"All Agents stopped!".postln;
+	~wAgents.do {|agent| agent[\routine].stop; agent[\vizRoutine].stop;};
 };
 
 
@@ -332,10 +341,16 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 
 	var tFunc = {TempoClock.default.beats.linlin(startTime, startTime + length, 0, 1)};
 
+	~stopAgents.value;
+
 	dispersalFunction = dispersalFunction ? 0.0;
 
 	~wViz.isNil.not.if {
 		~wViz.value(tFunc);
+	};
+
+	~clearViz.isNil.not.if {
+		~clearViz.value;
 	};
 
 	~wAgents.do {|agent, i|
@@ -352,25 +367,28 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 				// advance x in time
 				t = tFunc.value;
 
-				ret = doMonteCarlo.value(t, agent, agent[\xFunc], agent[\yFunc], agent[\pPlay], agent[\pRetry], agent[\maxRetries].value);
+				agent[\active].if {
 
-				(ret != false).if({
+					ret = doMonteCarlo.value(t, agent, agent[\xFunc], agent[\yFunc], agent[\pPlay], agent[\pRetry], agent[\maxRetries].value);
 
-					var note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
-					var vel =   agent[\velMap].(ret[\x], ret[\y], ret[\p], agent);
-					var len =   agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
+					(ret != false).if({
 
-					agent[\durMap].isKindOf(Pattern).if {
-						var stream = agent[\durMap].asStream;
-						agent[\durMap] = {|x, y, p, agent|
-						stream.next;
+						var note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
+						var vel =   agent[\velMap].(ret[\x], ret[\y], ret[\p], agent);
+						var len =   agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
+
+						agent[\durMap].isKindOf(Pattern).if {
+							var stream = agent[\durMap].asStream;
+							agent[\durMap] = {|x, y, p, agent|
+								stream.next;
+							};
 						};
-					};
 
-					dur =       agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
+						dur =       agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
 
-					agent[\act].value(note, vel, len, x, y, p, agent);
-				});
+						agent[\act].value(note, vel.round, len, x, y, p, agent);
+					});
+				};
 
 				dur.wait;
 

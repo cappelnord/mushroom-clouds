@@ -1,13 +1,15 @@
 import netP5.*;
 import oscP5.*;
 
-static float resampleY = 1.0;
+final static float resampleY = 1.0;
 
 volatile ArrayList<DataPoint> incoming;
 
 OscP5 oscP5;
 
 PGraphics fbo;
+
+boolean clearFlag = true;
 
 
 void setup() {
@@ -17,15 +19,16 @@ void setup() {
   oscP5 = new OscP5(this, 57140);
   incoming = new ArrayList<DataPoint>();
   frameRate(60);
-  
-  fbo.beginDraw();
-  fbo.background(0);
-  fbo.endDraw();
 }
 
 void draw() {
   
   fbo.beginDraw();
+  
+  if(clearFlag) {
+    fbo.background(0);
+    clearFlag = false;
+  }
   
   ArrayList<DataPoint> drawing = new ArrayList(incoming);
   incoming = new ArrayList<DataPoint>();
@@ -51,8 +54,10 @@ void oscEvent(OscMessage msg) {
   if(msg.addrPattern().equals("/m")) {
     if(msg.arguments().length % 3 != 0) {return;}
     for(int i = 0; i < msg.arguments().length / 3; i++) {
-      DataPoint point = new DataPoint(new PVector(msg.get(i*3).floatValue(), msg.get(i*3+1).floatValue()), msg.get(i*3+2).floatValue());
+      DataPoint point = new DataPoint(new PVector(msg.get(i*3).floatValue(), 1.0 - msg.get(i*3+1).floatValue()), msg.get(i*3+2).floatValue());
       incoming.add(point);
     }
+  } else if(msg.addrPattern().equals("/clear")) {
+    clearFlag = true;
   }
 }
