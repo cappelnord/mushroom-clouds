@@ -15,25 +15,27 @@ var vizNet;
 	yFunc = yFunc ? {1.0.rand};
 
 	~wViz = {|tFunc|
-		"wViz".postln;
 		~wAgents.do {|agent, i|
 			agent[\vizRoutine] = Routine({
 				var t = 0;
 
 				{t < 1.0}.while {
 
-					var vals = List();
-					num.do {
-						var y = yFunc.value;
-						var value = agent[\pPlay].value(t, y, agent).min(1).max(0).sqrt.sqrt;
-						vals.add(t);
-						vals.add(y);
-						vals.add(value);
+					agent[\active].if {
+						var vals = List();
+						var activeAgents = ~wAgents.count({|x| x[\active]});
+						var thisNum = (num * (~wAgents.size / activeAgents.asFloat)).ceil;
+						thisNum.do {
+							var y = yFunc.value;
+							var value = agent[\pPlay].value(t, y, agent).min(1).max(0).sqrt.sqrt;
+							vals.add(t);
+							vals.add(y);
+							vals.add(value);
+						};
+
+						vizNet.sendMsg("/m", *vals);
+						t = tFunc.value;
 					};
-
-					vizNet.sendMsg("/m", *vals);
-
-					t = tFunc.value;
 					interval.wait;
 				};
 			}).play(TempoClock.default);

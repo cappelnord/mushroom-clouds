@@ -29,8 +29,6 @@ var createMIDIFunction = {|destination, channel=0, retrigger=true|
 
 		var routine = table[num];
 
-		[num, vel, dur].postln;
-
 		routine.isNil.if ({
 			destination.noteOn(channel, num, vel);
 		}, {
@@ -207,7 +205,24 @@ var doMonteCarlo;
 
 	agent[\active] = true;
 
+	agent[\echo] = false;
+
+	agent[\history] = List();
+
 	agent;
+};
+
+~pInterval = {|intervals|
+	{|x, y, agent|
+		var note = agent[\noteMap].value(x, y);
+		var last = agent[\history].last[\note];
+		last.isNil.if ({
+			1.0;
+		}, {
+			var targets = last + intervals;
+			targets.indexOf(note).isNil.not.if(1.0, 0.0);
+	    });
+	};
 };
 
 ~pScale = {|scale, root=0|
@@ -219,7 +234,7 @@ var doMonteCarlo;
 		degrees = scale.degrees + root % stepsPerOctave;
 	}, {
 		stepsPerOctave = 12;
-		degrees = scale;
+		degrees = scale + root % stepsPerOctave;
 	});
 
 	{|x, y, agent|
@@ -289,7 +304,7 @@ var doMonteCarlo;
 	};
 };
 
-doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFunc=0.5, maxRetries=64|
+doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFunc=0.5, maxRetries=128|
 	var redrawProbability;
 	var playProbability;
 
@@ -374,8 +389,8 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 					(ret != false).if({
 
 						var note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
-						var vel =   agent[\velMap].(ret[\x], ret[\y], ret[\p], agent);
-						var len =   agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
+						var vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt;
+						var len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
 
 						agent[\durMap].isKindOf(Pattern).if {
 							var stream = agent[\durMap].asStream;
@@ -384,9 +399,15 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 							};
 						};
 
-						dur =       agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
+						dur = agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
 
-						agent[\act].value(note, vel.round, len, x, y, p, agent);
+						agent[\echo].if {
+							">> %  %  %".format(note.asString.padRight(3), vel.asString.padRight(3), len.round(0.001)).postln;
+						};
+
+						agent[\history].add((\note: note, \vel: vel, \len: len));
+
+						agent[\act].value(note, vel, len, x, y, p, agent);
 					});
 				};
 
