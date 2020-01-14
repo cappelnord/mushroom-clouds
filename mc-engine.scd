@@ -300,6 +300,17 @@ var doMonteCarlo;
 	});
 };
 
+~pSineWindow = {|posFunc=0.5, sizeFunc=0.5|
+	{|x, y, agent|
+		var pos = posFunc.value(x, y, agent);
+		var size = sizeFunc.value(x, y, agent);
+		var windowMin = pos - (size/2);
+		var windowMax = pos + (size/2);
+		var phase = y.linlin(windowMin, windowMax, 0.0, pi);
+		phase.sin;
+	}
+};
+
 ~pMix = {|mixFunc=0, aFunc=1, bFunc=0, clip=true|
 	{|x, y, agent|
 		var mix = mixFunc.value(x, y, agent).min(1).max(0);

@@ -37,7 +37,11 @@ void draw() {
     int x = int(point.pos.x * fbo.width);
     int y = int(point.pos.y * fbo.height);
     // int y = int(floor(point.pos.y * height / resampleY) * resampleY);
-    fbo.stroke(point.value * 255);
+    float b = point.value * 255 * 1.1;
+    if(b > 255) {
+      b = 255;
+    }
+    fbo.stroke(b);
     // rect(x, y, 3, resampleY);
     // ellipse(x, y, resampleY, resampleY);
     fbo.point(x, y);

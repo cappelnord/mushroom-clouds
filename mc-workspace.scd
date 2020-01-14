@@ -10,34 +10,20 @@
 // TODO: Schauen was passiert mit OSC Fehlern in Processing
 // TODO: Poster machen
 // TODO: ~cc that smooth over time
-// TODO: Sine-Windows (auch als HPF/BPF)
 
 
 /*
-"Agaricus sp."
-"Amanita rubescens"
-"Clathrus archeri"
-"Coprinellus disseminatus"
-"Coprinellus micaceus"
-"Coprinopsis picacea"
-"Fomitopsis pinicola"
-"Helvella lacunosa"
-"Laetiporus sulphureus"
-"Lepiota aspera"
-"Lycoperdon excipuliforme"
-"Macrolepiota fuliginosa"
-"Pleurotus ostreatus Mycel"
-"Pleurotus ostreatus"
-"Russula sp."
-"Schizophyllum commune"
-"Sparassis crispa"
-"Trametes versicolor"
-"Tremella mesenterica"
-"Xerocomellus sp."
+"Agaricus sp."  "Amanita rubescens"  "Clathrus archeri"
+"Coprinellus disseminatus"  "Coprinellus micaceus"  "Coprinopsis picacea"
+"Fomitopsis pinicola"  "Helvella lacunosa"  "Laetiporus sulphureus"
+"Lepiota aspera"  "Lycoperdon excipuliforme"  "Macrolepiota fuliginosa"
+"Pleurotus ostreatus Mycel"  "Pleurotus ostreatus"  "Russula sp."
+"Schizophyllum commune"  "Sparassis crispa"  "Trametes versicolor"
+"Tremella mesenterica"  "Xerocomellus sp."
 */
 
-
 ~pedSustain.(0, 2)
+~pedCorda.(127, 2)
 
 (
 var activeAgents = 32;
@@ -48,8 +34,10 @@ var activeAgents = 32;
 	var p1 = ~pFungus.("Agaricus sp.").pow(2);
 	var p2 = ~pFungus.("Pleurotus ostreatus Mycel").pow(2);
 
+	var windows = [3, 8, 13, 20].collect {|i| ~pSineWindow.({|x| (x*i).sin.abs}, 0.3)};
 
-	agent[\pPlay] = (~pMix.(~pFungus.("Trametes versicolor"), p1, p2) * 0.5 + (~pScale.([0, 7, 9], 0) * ~pFungus.("Sparassis crispa"))) * ~pScale.([0]);
+
+	agent[\pPlay] = p1 * windows.sum.min(1).max(0) * ~pScale.([7], 0) - ~pSineWindow.(1, 0.7) + (p2 * 0.3) + ~pInterval.([-1, 1, -2, 2]) * ~pScale.(Scale.minorPentatonic);
 
 	agent[\act] = ~piano;
 	agent[\durMap] = Prand([0.5, 1, 0.75,2, 4], inf);
