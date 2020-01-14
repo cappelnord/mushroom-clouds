@@ -3,18 +3,14 @@
 
 ~runAgents.(60 * 8, {|i| i * 0.125})
 
-// TODO: put closest freq ratio in
+// TODO: put closest freq ratio in (Eventuell refaktorieren)
 // TODO: Absichern wenn mal Fehler passieren
 // TODO: Scale Weight Filter
 // TODO: Fungi-Sampling über komplette Taste
 // TODO: Schauen was passiert mit OSC Fehlern in Processing
-// TODO: Schauen wieso die Grafik irgendwie verzerrt dargestellt wird; gibt's irgendwo noch eine Transferkurve die angewandt wird?
-// TODO: combine Funktion
-// TODO: kann lenMap Pattern sein?
 // TODO: Poster machen
 // TODO: ~cc that smooth over time
-// TODO: MIDI-Noten & Velocities clippen max/min
-
+// TODO: Sine-Windows (auch als HPF/BPF)
 
 
 /*
@@ -49,19 +45,25 @@ var activeAgents = 32;
 ~wAgents.do {|agent, i|
 	// {|x, y, agent| 1.0 }
 
+	var p1 = ~pFungus.("Agaricus sp.").pow(2);
+	var p2 = ~pFungus.("Pleurotus ostreatus Mycel").pow(2);
+
+
+	agent[\pPlay] = (~pMix.(~pFungus.("Trametes versicolor"), p1, p2) * 0.5 + (~pScale.([0, 7, 9], 0) * ~pFungus.("Sparassis crispa"))) * ~pScale.([0]);
+
 	agent[\act] = ~piano;
-	agent[\durMap] = Prand([1, 1/3.0, 2/3.0, 0.5], inf);
-	agent[\velMap] = ~defaultVelMap * 1.0 * {|x, y| y};
-	agent[\quant] = 2;
-
-	agent[\pPlay] = ~pFungus.("Pleurotus ostreatus Mycel");
-
-	agent[\pRetry] = {|x, y, agent| 0.96 };
-
-	agent[\lenMap] = 8;
+	agent[\durMap] = Prand([0.5, 1, 0.75,2, 4], inf);
+	agent[\velMap] = ~defaultVelMap * 0.9;
+	agent[\quant] = nil;
 
 
-	agent[\echo] = true;
+
+	agent[\pRetry] = {|x, y, agent| 0.7 };
+
+	agent[\lenMap] = 4;
+
+
+	agent[\echo] = false;
 	agent[\active] = i < activeAgents;
 };
 

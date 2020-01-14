@@ -10,10 +10,11 @@ var loadImage = {|file|
 	// calculates the average of the 3 color channels and stores it as a normalized float
 
 	pixels.do {|c, i|
-		var blue = c &  0x000000FF;
+		var blue = c & 0x000000FF;
 		var green = c & 0x0000FF00 >> 8;
 		var red = c & 0x00FF0000 >> 16;
-		var value = red + green + blue / 3.0 / 256.0;
+		// var value = (red + green + blue) / (3.0 * 256.0);
+		var value = blue / 256.0;
 		array[i] = value;
 	};
 
@@ -212,10 +213,17 @@ var doMonteCarlo;
 	agent;
 };
 
-~pInterval = {|intervals|
+~pInterval = {|intervals, wrapOctaves=false|
 	{|x, y, agent|
 		var note = agent[\noteMap].value(x, y);
 		var last = agent[\history].last[\note];
+
+		wrapOctaves.if {
+			note = note % 12;
+			last = last % 12;
+			intervals = intervals % 12;
+		};
+
 		last.isNil.if ({
 			1.0;
 		}, {
@@ -291,6 +299,31 @@ var doMonteCarlo;
 		{1.0};
 	});
 };
+
+~pMix = {|mixFunc=0, aFunc=1, bFunc=0, clip=true|
+	{|x, y, agent|
+		var mix = mixFunc.value(x, y, agent).min(1).max(0);
+		var a = aFunc.value(x, y, agent);
+		var b = bFunc.value(x, y, agent);
+		clip.if {
+			a = a.min(1).max(0);
+			b = b.min(1).max(0);
+		};
+		((1.0 - mix) * a) + (mix * b);
+	};
+};
+
+~patternToFunction = {|obj|
+	obj.isKindOf(Pattern).if ({
+		var stream = obj.asStream;
+		{|x, y, p, agent|
+			stream.next;
+		}
+	}, {
+		obj;
+	});
+};
+
 
 
 ~initAgents = {|num|
@@ -388,16 +421,14 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 
 					(ret != false).if({
 
-						var note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
-						var vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt;
-						var len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
+						var note, vel, len;
 
-						agent[\durMap].isKindOf(Pattern).if {
-							var stream = agent[\durMap].asStream;
-							agent[\durMap] = {|x, y, p, agent|
-								stream.next;
-							};
-						};
+						agent[\durMap] = ~patternToFunction.value(agent[\durMap]);
+						agent[\lenMap] = ~patternToFunction.value(agent[\lenMap]);
+
+						note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
+						vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt.min(127).max(0);
+						len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
 
 						dur = agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
 

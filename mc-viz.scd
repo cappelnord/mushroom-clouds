@@ -27,7 +27,7 @@ var vizNet;
 						var thisNum = (num * (~wAgents.size / activeAgents.asFloat)).ceil;
 						thisNum.do {
 							var y = yFunc.value;
-							var value = agent[\pPlay].value(t, y, agent).min(1).max(0).sqrt.sqrt;
+							var value = agent[\pPlay].value(t, y, agent).min(1).max(0);
 							vals.add(t);
 							vals.add(y);
 							vals.add(value);
