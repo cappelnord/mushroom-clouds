@@ -65,3 +65,9 @@ void oscEvent(OscMessage msg) {
     clearFlag = true;
   }
 }
+
+void keyPressed() {
+  if (key == 'f' || key == 'F') {
+    saveFrame();
+  }
+}

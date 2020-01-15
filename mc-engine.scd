@@ -134,7 +134,6 @@ var doMonteCarlo;
 		var value = 0.0;
 		MIDIdef.cc(("mccc" ++ cc).asSymbol, {|val|
 			value = val.linlin(0, 127, 0, 1.0);
-			value.postln;
 		}, cc, channel);
 
 		currentEnvironment[key] = {value};
@@ -161,6 +160,10 @@ var doMonteCarlo;
 	~wNotes[(y * ~wNotes.size).floor]
 };
 
+~defaultFreqMap = {|x, y, p, agent|
+	y.linexp(0, 1, ~wNotes.first.midicps, ~wNotes.last.midicps);
+};
+
 ~defaultVelMap = {|x, y, p, agent|
 	(48 + ((x * (agent[\index] * 0.1)).sin * 6) + 0.gauss(8).abs + (6 * p));
 };
@@ -173,6 +176,7 @@ var doMonteCarlo;
 
 	agent[\noteMap] = ~defaultNoteMap;
 	agent[\velMap] = ~defaultVelMap;
+	agent[\freqMap] = ~defaultFreqMap;
 
 	agent[\lenMap] = {|x, y, p, agent|
 		10
@@ -251,34 +255,25 @@ var doMonteCarlo;
 	};
 };
 
-
-// fundamental Freq
-
-
-~pClosestFreqRatio = {|fundamentalFreqFunction, fundamentalFreqSections|
+~pHarmonicComb = {|fundamentalFreqFunction, harmonics, width=0.1|
 
 	fundamentalFreqFunction = fundamentalFreqFunction ? {|x, y, agent| x.linexp(0, 1, 27.5, 27.5 * 4)};
-	fundamentalFreqSections = fundamentalFreqSections ? [0.25, 1, 8];
+	harmonics = harmonics ? (1..8);
 
 	{|x, y, agent|
-		var freq = agent[\noteMap].value(x, y).midicps;
+		var freq = agent[\freqMap].value(x, y);
 		var fund = fundamentalFreqFunction.value(x, y);
-		var targets = fundamentalFreqSections * fund;
-		var harmonics;
-		var deviation;
 
-		// look in which section we are and set as fundamental frequency
-		targets.do {|target|
-			(freq >= target).if {
-				fund = target;
-			};
+		var ret = 0;
+
+		(fund * harmonics).do {|harmonicFreq|
+			var lower = harmonicFreq * (1.0 - (width / 2.0));
+			var upper = harmonicFreq * (1.0 + (width / 2.0));
+			var phase = freq.explin(lower, upper, 0, pi);
+			ret = ret + phase.sin;
 		};
 
-		harmonics = (1..8) * fund;
-		deviation = harmonics.collect({|h| (h-freq).abs / h}).sort.first;
-
-		// shaping the final probability (according to my likings)
-		(1.0 - deviation.sqrt.sqrt - 0.2).max(0) * (1.0/0.8);
+		ret.tanh;
 	};
 };
 
@@ -323,6 +318,17 @@ var doMonteCarlo;
 		((1.0 - mix) * a) + (mix * b);
 	};
 };
+
+~pPart = {|partYFunc=0.5, belowFunc=1, aboveFunc=0|
+	{|x, y, agent|
+		(y < partYFunc.value(x, y, agent)).if({
+			belowFunc.value(x, y, agent);
+		}, {
+			aboveFunc.value(x, y, agent);
+		});
+	};
+};
+
 
 ~patternToFunction = {|obj|
 	obj.isKindOf(Pattern).if ({
