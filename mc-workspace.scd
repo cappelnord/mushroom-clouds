@@ -31,7 +31,7 @@ ENDE: Mit Pedal! Mit Tremella multiplizieren?
 
 */
 
-~runAgents.(60 * 8, {|i| i * 0.625})
+~runAgents.(60 * 8, {|i| i * 0.325})
 
 ~pedSustain.(0)
 
@@ -54,7 +54,7 @@ var activeAgents = 32;
 
 	p = p * (~pScale.([0, 7]));
 
-	p = p - (~pSineWindow.(0, 0.1) + (~pSineWindow.(1, 0.2) * 0.5));
+	p = p - (~pSineWindow.(0, 0.1) + (~pSineWindow.(1, 0.2) * 0.25));
 
 	agent[\pPlay] = p;
 
