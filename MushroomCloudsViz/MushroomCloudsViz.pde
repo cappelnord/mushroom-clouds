@@ -3,7 +3,7 @@ import oscP5.*;
 
 final static float resampleY = 1.0;
 
-volatile ArrayList<DataPoint> incoming;
+ArrayList<DataPoint> incoming;
 
 OscP5 oscP5;
 
@@ -30,8 +30,13 @@ void draw() {
     clearFlag = false;
   }
   
-  ArrayList<DataPoint> drawing = new ArrayList(incoming);
-  incoming = new ArrayList<DataPoint>();
+  
+  ArrayList<DataPoint> drawing;
+  
+  synchronized(incoming) {
+    drawing = new ArrayList(incoming);
+    incoming = new ArrayList<DataPoint>();
+  }
     
   for(DataPoint point : drawing) {
     int x = int(point.pos.x * fbo.width);
@@ -57,9 +62,11 @@ void oscEvent(OscMessage msg) {
   
   if(msg.addrPattern().equals("/m")) {
     if(msg.arguments().length % 3 != 0) {return;}
-    for(int i = 0; i < msg.arguments().length / 3; i++) {
-      DataPoint point = new DataPoint(new PVector(msg.get(i*3).floatValue(), 1.0 - msg.get(i*3+1).floatValue()), msg.get(i*3+2).floatValue());
-      incoming.add(point);
+    synchronized(incoming) {
+      for(int i = 0; i < msg.arguments().length / 3; i++) {
+        DataPoint point = new DataPoint(new PVector(msg.get(i*3).floatValue(), 1.0 - msg.get(i*3+1).floatValue()), msg.get(i*3+2).floatValue());
+        incoming.add(point);
+      }
     }
   } else if(msg.addrPattern().equals("/clear")) {
     clearFlag = true;

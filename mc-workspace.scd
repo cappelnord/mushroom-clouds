@@ -1,52 +1,64 @@
 
 // Mushroom Clouds
 
-~runAgents.(60 * 8, {|i| i * 0.125})
 
-// TODO: Absichern wenn mal Fehler passieren
-// TODO: !!! Schauen was passiert mit OSC Fehlern in Processing !!!
-// TODO: Poster machen
-// TODO: ~cc that smooth over time
-// TODO: Wenn ein Agent einen fehler wirft dann läuft er nicht mehr weiter
-
-// TODO: Pilze sortieren
-// TODO: Skalen raussuchen
+// TODO: Konkreten Anfang machen.
 // TODO: Come up with Anfang / Come up with Ende
 
-/*
-"Agaricus sp."  "Amanita rubescens"  "Clathrus archeri"
-"Coprinellus disseminatus"  "Coprinellus micaceus"  "Coprinopsis picacea"
-"Fomitopsis pinicola"  "Helvella lacunosa"  "Laetiporus sulphureus"
-"Lepiota aspera"  "Lycoperdon excipuliforme"  "Macrolepiota fuliginosa"
-"Pleurotus ostreatus Mycel"  "Pleurotus ostreatus"  "Russula sp."
-"Schizophyllum commune"  "Sparassis crispa"  "Trametes versicolor"
-"Tremella mesenterica"  "Xerocomellus sp."
+/* REMOVE
+Scale.bartok  Scale.scriabin  Scale.harmonicMinor
+Scale.minor  Scale.melodicMinorDesc
 */
 
-~pedSustain.(0, 2)
-~pedCorda.(0, 2)
+/*
+ANFANG: Mit Pedal! Auch um das C herum spielend. Dann mit Vel-Choose Funktion einzelne lautere Tasten integrieren.
+
+Wenn es mehr chromatisch/dichter wird dann Pedal weg, kürzere Töne.
+Dafür mit harmonic combs. Breitere Harmonic Combs wirken auch gleich
+mehr wie Melodien, weniger wie Pattern.
+
+ENDE: Mit Pedal! Mit Tremella multiplizieren?
+
+*/
+
+/*
+"Agaricus sp."  "Sparassis crispa"  "Lycoperdon excipuliforme"
+"Coprinellus micaceus" "Coprinellus disseminatus"  "Pleurotus ostreatus"
+"Clathrus archeri" "Coprinopsis picacea"
+"Laetiporus sulphureus"  "Trametes versicolor"
+"Amanita rubescens"  "Macrolepiota fuliginosa"
+"Fomitopsis pinicola"  "Helvella lacunosa"  "Pleurotus ostreatus Mycel"
+"Lepiota aspera"  "Russula sp."  "Xerocomellus sp."
+"Schizophyllum commune"  "Tremella mesenterica"
+*/
+
+~runAgents.(60 * 8, {|i| i * 0.625})
+
+~pedSustain.(127, 2)
 
 (
 var activeAgents = 32;
 
+~storeAllAgents.();
+
 ~wAgents.do {|agent, i|
 	// {|x, y, agent| 1.0 }
 
-	var p1 = ~pFungus.("Fomitopsis pinicola").pow(2);
-	var p2 = ~pFungus.("Tremella mesenterica").pow(2);
+	var p1 = ~pFungus.("Pleurotus ostreatus").pow(2);
+	var p2 = ~pFungus.("Pleurotus ostreatus Mycel").pow(2);
 
-	agent[\pPlay] = ~pPart.({|x| (x*200).sin.abs}, p1, p2) * ~pScale.(Scale.major, 0) - ~pSineWindow.(0, 0.2) * ~pHarmonicComb.(200, (1..12), 0.4);
+	agent[\pPlay] = p1;
 
 	agent[\act] = ~piano;
-	agent[\durMap] = Prand([0.5, 1.5, 1, 4], inf);
-	agent[\velMap] = ~defaultVelMap;
+	agent[\durMap] = Prand([1, 0.5, 0.25, 0.75], inf);
+	agent[\velMap] = ~defaultVelMap * 0.6 + {[0,0,0,0, 40].choose};
 	agent[\quant] = nil;
 
-	agent[\pRetry] = {|x, y, agent| 0.9 };
+	agent[\pRetry] = {|x, y, agent| 0.55 };
 
-	agent[\lenMap] = Prand([0.5, 1, 0.25], inf) * 3;
+	agent[\lenMap] = Prand([0.5, 1, 0.25], inf) * 4;
 
-	agent[\echo] = true;
+	agent[\echo] = false;
 	agent[\active] = i < activeAgents;
 };
 

@@ -1,5 +1,7 @@
 var midiInConnections = Dictionary();
 
+var agentStoreKeys;
+
 var loadImage = {|file|
 	var image = Image.open(file);
 
@@ -165,9 +167,28 @@ var doMonteCarlo;
 };
 
 ~defaultVelMap = {|x, y, p, agent|
-	(48 + ((x * (agent[\index] * 0.1)).sin * 6) + 0.gauss(8).abs + (6 * p));
+	(48 + ((x * (agent[\index] * 0.1)).sin * 6) + 0.gauss(8).abs + (6 * p)) - y.linlin(0, 0.2, 8, 0);
 };
 
+~storeAllAgents = {
+	~wAgents.do {|agent|
+		~storeAgent.value(agent);
+	};
+};
+
+~storeAgent = {|agent|
+	agent[\store] = ();
+
+	agentStoreKeys.do {|key|
+		agent[\store][key] = agent[key];
+	};
+};
+
+~restoreAgent = {|agent|
+	agentStoreKeys.do {|key|
+		agent[key] = agent[\store][key];
+	};
+};
 
 ~initAgent = {
 	var agent = ();
@@ -214,6 +235,10 @@ var doMonteCarlo;
 
 	agent[\history] = List();
 
+	agentStoreKeys = agent.keys.copy;
+
+	~storeAgent.value(agent);
+
 	agent;
 };
 
@@ -233,7 +258,7 @@ var doMonteCarlo;
 		}, {
 			var targets = last + intervals;
 			targets.indexOf(note).isNil.not.if(1.0, 0.0);
-	    });
+		});
 	};
 };
 
@@ -252,6 +277,16 @@ var doMonteCarlo;
 	{|x, y, agent|
 		var note = agent[\noteMap].value(x, y) % stepsPerOctave;
 		degrees.indexOf(note).isNil.not.if(1.0, 0.0);
+	};
+};
+
+~pOctaves = {|octaves|
+	octaves = [octaves].flatten;
+
+	{|x, y, agent|
+		var note = agent[\noteMap].value(x, y);
+		var octave = (note / 12).floor.asInt;
+		octaves.indexOf(octave).isNil.not.if(1.0, 0.0);
 	};
 };
 
@@ -429,44 +464,50 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 			{t < 1.0}.while({
 				var ret;
 
-				// advance x in time
-				t = tFunc.value;
+				{
+					// advance x in time
+					t = tFunc.value;
 
-				agent[\active].if {
+					agent[\active].if {
 
-					ret = doMonteCarlo.value(t, agent, agent[\xFunc], agent[\yFunc], agent[\pPlay], agent[\pRetry], agent[\maxRetries].value);
+						ret = doMonteCarlo.value(t, agent, agent[\xFunc], agent[\yFunc], agent[\pPlay], agent[\pRetry], agent[\maxRetries].value);
 
-					(ret != false).if({
+						(ret != false).if({
 
-						var note, vel, len;
+							var note, vel, len;
 
-						agent[\durMap] = ~patternToFunction.value(agent[\durMap]);
-						agent[\lenMap] = ~patternToFunction.value(agent[\lenMap]);
+							agent[\durMap] = ~patternToFunction.value(agent[\durMap]);
+							agent[\lenMap] = ~patternToFunction.value(agent[\lenMap]);
 
-						note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
-						vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt.min(127).max(0);
-						len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
+							note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
+							vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt.min(127).max(0);
+							len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
 
-						dur = agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
+							dur = agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
 
-						agent[\echo].if {
-							">> %  %  %".format(note.asString.padRight(3), vel.asString.padRight(3), len.round(0.001)).postln;
-						};
+							agent[\echo].if {
+								">> %  %  %".format(note.asString.padRight(3), vel.asString.padRight(3), len.round(0.001)).postln;
+							};
 
-						agent[\history].add((\note: note, \vel: vel, \len: len));
+							agent[\history].add((\note: note, \vel: vel, \len: len));
 
-						agent[\act].value(note, vel, len, x, y, p, agent);
-					});
-				};
+							agent[\act].value(note, vel, len, x, y, p, agent);
+						});
+					};
 
-				dur.wait;
+					dur.wait;
 
-				agent[\quant].isNil.not.if {
-					var nextTime = agent[\quant].asQuant.nextTimeOnGrid(TempoClock.default);
-					(nextTime - TempoClock.default.beats).wait;
-					agent[\quant] = nil;
-				};
+					agent[\quant].isNil.not.if {
+						var nextTime = agent[\quant].asQuant.nextTimeOnGrid(TempoClock.default);
+						(nextTime - TempoClock.default.beats).wait;
+						agent[\quant] = nil;
+					};
 
+				}.try({|error|
+					error.errorString.postln;
+					"Agent got restored to last safe state!".warn;
+					~restoreAgent.value(agent);
+				});
 			});
 		}).play(TempoClock.default);
 	}
