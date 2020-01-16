@@ -1,21 +1,5 @@
 // Mushroom Clouds
 
-/* REMOVE
-Scale.bartok  Scale.scriabin  Scale.harmonicMinor
-Scale.minor  Scale.melodicMinorDesc
-*/
-
-/*
-ANFANG: Mit Pedal! Auch um das C herum spielend. Dann mit Vel-Choose Funktion einzelne lautere Tasten integrieren.
-
-Wenn es mehr chromatisch/dichter wird dann Pedal weg, kürzere Töne.
-Dafür mit harmonic combs. Breitere Harmonic Combs wirken auch gleich
-mehr wie Melodien, weniger wie Pattern.
-
-ENDE: Mit Pedal! Mit Tremella multiplizieren?
-
-*/
-
 /*
 "Agaricus sp."  "Sparassis crispa"  "Lycoperdon excipuliforme"
 "Coprinellus micaceus" "Coprinellus disseminatus"  "Pleurotus ostreatus"
