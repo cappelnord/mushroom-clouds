@@ -15,7 +15,7 @@
 
 */
 
-~runAgents.(60 * 8, {|i| i * 0.325})
+~runAgents.(60 * 12, {|i| i * 0.325})
 
 ~pedSustain.(0)
 
