@@ -318,9 +318,11 @@ var doMonteCarlo;
 	i.isNil.not.if({
 		{|x, y, agent|
 			var ret;
-			x = (x * i[\width]).floor;
-			y = ((1.0 - y) * i[\height]).floor;
-			ret = i[\array][y * i.width + x];
+			var idx;
+			x = (x * i[\width]).floor.asInt.max(0).min(i[\width]-1).asInt;
+			y = ((1.0 - y) * i[\height]).ceil.max(0).min(i[\height]-1).asInt;
+			idx = (y * i.width + x).asInt;
+			ret = i[\array][idx];
 			// shaping the final probability with sqrt (according to my likings)
 			ret;
 		};
