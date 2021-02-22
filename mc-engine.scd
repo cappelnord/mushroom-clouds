@@ -285,7 +285,7 @@ var doMonteCarlo;
 
 	{|x, y, agent|
 		var note = agent[\noteMap].value(x, y);
-		var octave = (note / 12).floor.asInt;
+		var octave = (note / 12).floor.asInteger;
 		octaves.indexOf(octave).isNil.not.if(1.0, 0.0);
 	};
 };
@@ -324,9 +324,9 @@ var doMonteCarlo;
 			var ret;
 			var idx;
 			y = (1.0 - y);
-			x = (x * width).floor.max(0).min(width-1).asInt;
-			y = (y * height).floor.max(0).min(height-1).asInt;
-			idx = (y * width + x).asInt;
+			x = (x * width).floor.max(0).min(width-1).asInteger;
+			y = (y * height).floor.max(0).min(height-1).asInteger;
+			idx = (y * width + x).asInteger;
 			ret = array[idx];
 			ret;
 		};
@@ -357,10 +357,10 @@ var doMonteCarlo;
 			y = (iy * height).max(0).min(height);
 
 
-			x1 = x.floor.max(0).min(width-1).asInt;
-			x2 = x.ceil.max(0).min(width-1).asInt;
-			y1 = y.floor.max(0).min(height-1).asInt;
-			y2 = y.ceil.max(0).min(height-1).asInt;
+			x1 = x.floor.max(0).min(width-1).asInteger;
+			x2 = x.ceil.max(0).min(width-1).asInteger;
+			y1 = y.floor.max(0).min(height-1).asInteger;
+			y2 = y.ceil.max(0).min(height-1).asInteger;
 
 			fq11 = array[y1 * width + x1];
 			fq21 = array[y1 * width + x2];
@@ -534,7 +534,7 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 							agent[\lenMap] = ~patternToFunction.value(agent[\lenMap]);
 
 							note = agent[\noteMap].(ret[\x], ret[\y], ret[\p], agent);
-							vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInt.min(127).max(0);
+							vel = agent[\velMap].(ret[\x], ret[\y], ret[\p], agent).round.asInteger.min(127).max(0);
 							len = agent[\lenMap].(ret[\x], ret[\y], ret[\p], agent);
 
 							dur = agent[\durMap].(ret[\x], ret[\y], ret[\p], agent);
