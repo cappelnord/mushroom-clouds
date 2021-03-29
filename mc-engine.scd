@@ -142,12 +142,16 @@ var doMonteCarlo;
 	};
 };
 
+~initLoadFungus = {|file|
+	var key = file.fileNameWithoutExtension;
+	~wFungi[key] = loadImage.value(file.absolutePath);
+	("\"" ++ key ++ "\"").postln;
+};
+
 ~initLoadFungi = {|path|
 	var files = PathName(Document.current.dir ++ "/fungi").files;
 	files.do {|file|
-		var key = file.fileNameWithoutExtension;
-		~wFungi[key] = loadImage.value(file.absolutePath);
-		("\"" ++ key ++ "\"").postln;
+		~initLoadFungus.(file);
 	};
 };
 
