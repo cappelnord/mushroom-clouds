@@ -18,43 +18,37 @@
 s.scope
 
 
-~runAgents.(60 * 10, {|i| i * 2.5})
+// p = p - (~pSineWindow.(0, 0.1) + (~pSineWindow.(1, 0.2) * 0.25));
+
+
+~runAgents.(60 * 10, {|i| i * 0.5})
 
 (
-var activeAgents = 32;
+var activeAgents = 8;
 
 ~storeAllAgents.();
 
 ~wAgents.do {|agent, i|
 	// {|x, y, agent| 1.0 }
 
-	var p1 = ~pFungus.("Helvella lacunosa").pow(2);
-	var p2 = ~pFungus.("Lycoperdon excipuliforme").pow(2);
-	var p3 = ~pFungus.("Schizophyllum commune").pow(2);
-	var p4 = ~pFungus.("Amanita rubescens").pow(2);
-	var p5 = ~pFungus.("Tremella mesenterica").pow(2);
+	var p1 = ~pFungus.("Sparassis crispa").pow(2);
 	var p;
 
-	p = ~pPart.(0.5, p2, p3);
 
-	p = p  * ~pScale.([0, 7],0 ) + ((~pScale.(Scale.minorPentatonic,0)) * 0.1);
+	p = p1 * ~pScale.([0, 3, 7], 0);
 
-
-	// p = p - (~pSineWindow.(0, 0.1) + (~pSineWindow.(1, 0.2) * 0.25));
 
 	agent[\pPlay] = p;
 
-	agent[\durMap] = Prand([1, 0.5, 0.25, 0.75], inf);
-	agent[\velMap] = ~defaultVelMap * 1.1 + {[5, 0, 0, 0, 0, 10 + 5.rand].choose};
-	agent[\quant] = [0.25].choose;
+	agent[\durMap] = Prand([0.5, 0.25], inf);
+	agent[\velMap] = ~defaultVelMap * 1.2 + {[5, 0, 0, 0, 0, 10 + 5.rand].choose};
+	agent[\quant] = [0.5, 0.25].choose;
 
 	agent[\pRetry] = {|x, y, p, agent| 0.9 };
 
-	agent[\attMap] = {|x, y, p, agent| y.linexp(0, 1, 0.002, 0.0005) * 2 };
+	agent[\attMap] = {|x, y, p, agent| y.linexp(0, 1, 0.002, 0.0005) * 3 };
 
 	agent[\lenMap] = Prand([0.125, 0.5, 1, 0.75], inf) * 3;
-
-	// TODO: modRatio
 
 
 	agent[\act] = ~eno;
@@ -79,7 +73,6 @@ SynthDef(\fmPling, {|freq=440, out=0, pan=0, amp=0.1, len=8, modIndex=5, attack=
 
 (
 var times = 0!128;
-// sounds should not be retriggered too quick in succession
 var thresh = 0.125;
 
 

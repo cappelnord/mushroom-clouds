@@ -549,7 +549,7 @@ doMonteCarlo = {|t, agent, xFunc, yFunc, playProbabilityFunc, retryProbabilityFu
 
 							agent[\history].add((\note: note, \vel: vel, \len: len));
 
-							agent[\act].value(note, vel, len, x, y, p, agent);
+							agent[\act].value(note, vel, len, ret[\x], ret[\y], ret[\p], agent);
 						});
 					};
 
