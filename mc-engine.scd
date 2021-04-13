@@ -149,7 +149,7 @@ var doMonteCarlo;
 };
 
 ~initLoadFungi = {|path|
-	var files = PathName(Document.current.dir ++ "/fungi").files;
+	var files = PathName(path).files;
 	files.do {|file|
 		~initLoadFungus.(file);
 	};
