@@ -1,5 +1,3 @@
-// Mushroom Clouds
-
 /*
 "Agaricus sp."  "Sparassis crispa"  "Lycoperdon excipuliforme"
 "Coprinellus micaceus" "Coprinellus disseminatus"  "Pleurotus ostreatus"
@@ -9,17 +7,7 @@
 "Fomitopsis pinicola"  "Helvella lacunosa"  "Pleurotus ostreatus Mycel"
 "Lepiota aspera"  "Russula sp."  "Xerocomellus sp."
 "Schizophyllum commune"  "Tremella mesenterica"
-
-~pInterval, ~pScale, ~pOctaves, ~pHarmonicComb,
-~pFungus, ~pSineWindow, ~pMix, ~pPart
-
 */
-
-s.scope
-
-
-// p = p - (~pSineWindow.(0, 0.1) + (~pSineWindow.(1, 0.2) * 0.25));
-
 
 ~runAgents.(60 * 10, {|i| i * 0.5})
 
@@ -29,27 +17,19 @@ var activeAgents = 8;
 ~storeAllAgents.();
 
 ~wAgents.do {|agent, i|
-	// {|x, y, agent| 1.0 }
 
-	var p1 = ~pFungus.("Sparassis crispa").pow(2);
-	var p;
-
-
-	p = p1 * ~pScale.([0, 3, 7], 0);
-
+	var p = 0;
 
 	agent[\pPlay] = p;
 
-	agent[\durMap] = Prand([0.5, 0.25], inf);
-	agent[\velMap] = ~defaultVelMap * 1.2 + {[5, 0, 0, 0, 0, 10 + 5.rand].choose};
-	agent[\quant] = [0.5, 0.25].choose;
-
-	agent[\pRetry] = {|x, y, p, agent| 0.9 };
+	agent[\durMap] = Prand([0.5], inf);
+	agent[\velMap] = ~defaultVelMap * 1 + {[5, 0, 0, 0, 0, 10 + 5.rand].choose};
+	agent[\quant] = 0.25;
 
 	agent[\attMap] = {|x, y, p, agent| y.linexp(0, 1, 0.002, 0.0005) * 3 };
-
 	agent[\lenMap] = Prand([0.125, 0.5, 1, 0.75], inf) * 3;
 
+	agent[\pRetry] = {|x, y, p, agent| 0.9 };
 
 	agent[\act] = ~eno;
 	agent[\echo] = false;
