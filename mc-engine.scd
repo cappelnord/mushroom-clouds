@@ -340,54 +340,6 @@ var doMonteCarlo;
 	});
 };
 
-// BROKEN!!!
-~pBilinFungus = {|key|
-	var i = ~wFungi[key];
-	i.isNil.not.if({
-
-		var width = i[\width];
-		var height = i[\height];
-		var array = i[\array];
-
-		{|ix, iy, agent|
-			var ret;
-			var x, y, x1, x2, y1, y2;
-			var fq11, fq21, fq12, fq22;
-			var fxy1, fxy2;
-
-			iy = (1.0 - iy);
-
-			x = (ix * width).max(0).min(width);
-			y = (iy * height).max(0).min(height);
-
-
-			x1 = x.floor.max(0).min(width-1).asInteger;
-			x2 = x.ceil.max(0).min(width-1).asInteger;
-			y1 = y.floor.max(0).min(height-1).asInteger;
-			y2 = y.ceil.max(0).min(height-1).asInteger;
-
-			fq11 = array[y1 * width + x1];
-			fq21 = array[y1 * width + x2];
-			fq12 = array[y2 * width + x1];
-			fq22 = array[y2 * width + x2];
-
-			// https://en.wikipedia.org/wiki/Bilinear_interpolation
-
-			// PROBLEM IST, DASS UNTER DEM BRUCH 0 RAUSKOMMEN KANN ...
-
-			fxy1 = (((x2-x) / (x2-x1)) * fq11) + (((x-x1) / (x2-x1)) * fq21);
-			fxy2 = (((x2-x) / (x2-x1)) * fq12) + (((x-x1) / (x2-x1)) * fq22);
-
-			ret =  (((y2-y) / (y2-y1)) * fxy1) + (((y-y1) / (y2-y1)) * fxy2);
-
-			ret;
-		};
-	}, {
-		("Could not find fungus: " ++ key).postln;
-		{0.0};
-	});
-};
-
 ~pSineWindow = {|posFunc=0.5, sizeFunc=0.5|
 	{|x, y, agent|
 		var pos = posFunc.value(x, y, agent);

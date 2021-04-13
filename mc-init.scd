@@ -9,8 +9,8 @@
 "mc-viz.scd".loadRelative;
 ~initViz.value("127.0.0.1", 57140, 6, 0.04, ~scanYFunc.value(1080));
 
-// "mc-eno.scd".loadRelative;
-// ~eno = ~initEnoOut.();
+"mc-eno.scd".loadRelative;
+~eno = ~initEnoOut.();
 
 // ~initMIDICC.((1..8), "LPD8");
 // ~initMIDICC.((11..18), "LPD8");
@@ -19,3 +19,6 @@
 ~initAgents.(32);
 
 )
+
+s.scope;
+s.meter;
