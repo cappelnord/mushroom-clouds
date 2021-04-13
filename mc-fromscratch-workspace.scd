@@ -18,7 +18,11 @@ var activeAgents = 8;
 
 ~wAgents.do {|agent, i|
 
-	var p = 0;
+	var p1 = 0;
+
+
+
+	var p = p1;
 
 	agent[\pPlay] = p;
 
