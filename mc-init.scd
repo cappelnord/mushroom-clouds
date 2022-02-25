@@ -1,3 +1,5 @@
+s.options.device = "BlackHole 2ch";
+
 (
 "mc-engine.scd".loadRelative;
 
@@ -22,3 +24,7 @@
 
 s.scope;
 s.meter;
+
+(amp: 1).play
+
+s.meter
