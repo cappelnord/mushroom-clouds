@@ -16,7 +16,7 @@
 */
 
 
-~runAgents.(60 * 10, {|i| i * 2.5})
+~runAgents.(60 * 14, {|i| i * 2.5})
 
 (
 var activeAgents = 8;
@@ -52,6 +52,8 @@ var activeAgents = 8;
 	agent[\active] = i < activeAgents;
 };
 )
+
+s.meter
 
 
 (
